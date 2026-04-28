@@ -58,14 +58,25 @@ export async function POST(request) {
     }
 
     // Membersihkan markdown jika ada
-    const cleanedText = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+    let cleanedText = textResponse.replace(/```json/g, '').replace(/```/gi, '').trim();
     
     let summaryPoints = [];
     try {
+      // Coba parse JSON langsung
       summaryPoints = JSON.parse(cleanedText);
+      if (!Array.isArray(summaryPoints)) {
+        summaryPoints = [summaryPoints.toString()];
+      }
     } catch (e) {
-      // Fallback jika tidak berupa JSON
-      summaryPoints = cleanedText.split('\n').filter(line => line.trim().length > 0).map(line => line.replace(/^-\s*/, ''));
+      // Jika gagal, coba bersihkan bullets dan split per baris
+      summaryPoints = cleanedText
+        .split('\n')
+        .map(line => line.replace(/^(\d+\.\s*|-\s*|\*\s*)/, '').trim()) // Hapus format 1., -, *
+        .filter(line => line.length > 10);
+        
+      if (summaryPoints.length === 0) {
+        summaryPoints = [textResponse.substring(0, 150) + "..."];
+      }
     }
 
     return NextResponse.json({ summary: summaryPoints });
