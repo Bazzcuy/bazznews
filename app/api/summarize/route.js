@@ -8,11 +8,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Teks artikel tidak ditemukan" }, { status: 400 });
     }
 
-    let apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      // Fallback API Key provided by the user
-      apiKey = "AIzaSyAQamskWkRCOfvIub_Qr2p_0Mz-ETe8vUI";
+      return NextResponse.json({ error: "API Key Gemini tidak ditemukan. Silakan atur GEMINI_API_KEY di variabel lingkungan." }, { status: 500 });
     }
 
     const prompt = `

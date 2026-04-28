@@ -8,7 +8,11 @@ export async function POST(request) {
       return NextResponse.json({ error: "Parameter tidak lengkap" }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || "AIzaSyAQamskWkRCOfvIub_Qr2p_0Mz-ETe8vUI";
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return NextResponse.json({ error: "API Key Gemini tidak ditemukan. Silakan atur GEMINI_API_KEY di variabel lingkungan." }, { status: 500 });
+    }
 
     const prompt = `
       Terjemahkan seluruh teks berita berikut ke dalam bahasa ${language}.
