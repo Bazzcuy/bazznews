@@ -27,6 +27,12 @@ export default function AITranslator({ articleText, onTranslate }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Reset translator when navigating to a different article
+  useEffect(() => {
+    setLanguage("id");
+    setIsOpen(false);
+  }, [articleText]);
+
   const handleLanguageSelect = async (targetLang) => {
     setLanguage(targetLang);
     setIsOpen(false);

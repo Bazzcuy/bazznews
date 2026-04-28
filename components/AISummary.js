@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./AISummary.module.css";
 import { SparklesIcon } from "./Icons";
 
@@ -9,6 +9,13 @@ export default function AISummary({ articleText }) {
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState(null);
+
+  // Reset summary when navigating to a different article
+  useEffect(() => {
+    setIsOpen(false);
+    setSummary(null);
+    setError(null);
+  }, [articleText]);
 
   const generateSummary = async () => {
     if (isOpen) {

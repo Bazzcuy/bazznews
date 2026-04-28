@@ -29,6 +29,14 @@ export default function NewsChat({ articleText }) {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Reset chat when navigating to a different article
+  useEffect(() => {
+    setMessages([
+      { role: "bot", text: "Halo! Saya AI Bazznews. Tanyakan apa saja seputar berita di atas." }
+    ]);
+    setInput("");
+  }, [articleText]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };

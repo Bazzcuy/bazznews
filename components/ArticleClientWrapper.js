@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AISummary from "./AISummary";
 import VoiceReader from "./VoiceReader";
 import NewsChat from "./NewsChat";
@@ -11,6 +11,11 @@ import styles from "../app/berita/baca/page.module.css";
 export default function ArticleClientWrapper({ scrapedData, plainText, relatedNews = [] }) {
   const { title, image, author, date, content, source } = scrapedData;
   const [displayContent, setDisplayContent] = useState(content);
+
+  // Sync displayContent whenever article content changes (e.g. navigating to related news)
+  useEffect(() => {
+    setDisplayContent(content);
+  }, [content]);
 
   const handleTranslation = (translatedHtml) => {
     if (translatedHtml) {
