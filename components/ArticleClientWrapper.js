@@ -8,7 +8,7 @@ import AITranslator from "./AITranslator";
 import Link from "next/link";
 import styles from "../app/berita/baca/page.module.css";
 
-export default function ArticleClientWrapper({ scrapedData, plainText }) {
+export default function ArticleClientWrapper({ scrapedData, plainText, relatedNews = [] }) {
   const { title, image, author, date, content, source } = scrapedData;
   const [displayContent, setDisplayContent] = useState(content);
 
@@ -47,11 +47,21 @@ export default function ArticleClientWrapper({ scrapedData, plainText }) {
       <aside className={styles.sidebar}>
         <h3 className={styles.sidebarTitle}>Berita Terkait</h3>
         <ul className={styles.relatedList}>
-          <li className={styles.relatedItem}>
-            <Link href="/">
-              Kembali ke Beranda untuk melihat berita lainnya.
-            </Link>
-          </li>
+          {relatedNews.length > 0 ? (
+            relatedNews.map((item, index) => (
+              <li key={index} className={styles.relatedItem}>
+                <Link href={`/berita/baca?url=${encodeURIComponent(item.link)}`}>
+                  {item.title}
+                </Link>
+              </li>
+            ))
+          ) : (
+            <li className={styles.relatedItem}>
+              <Link href="/">
+                Kembali ke Beranda untuk melihat berita lainnya.
+              </Link>
+            </li>
+          )}
         </ul>
       </aside>
     </div>

@@ -1,9 +1,8 @@
 import ArticleClientWrapper from "@/components/ArticleClientWrapper";
-import AISummary from "@/components/AISummary";
-import VoiceReader from "@/components/VoiceReader";
 import Link from "next/link";
 import styles from "./page.module.css";
 import { scrapeArticle } from "@/app/utils/scrapeArticle";
+import { fetchRSS } from "@/app/utils/fetchRSS";
 
 export const revalidate = 3600; // Cache 1 hour
 
@@ -52,8 +51,40 @@ export default async function ReadPage({ searchParams }) {
 
   const { title, image, author, date, content, source } = scraped.data;
 
+  // Fetch related news
+  let relatedNews = [];
+  try {
+    const cnnRes = await fetchRSS("cnn", "terbaru");
+    const cnbcRes = await fetchRSS("cnbc", "terbaru");
+    const allNews = [...(cnnRes.success ? cnnRes.data : []), ...(cnbcRes.success ? cnbcRes.data : [])];
+
+    // Extract keywords from title (words > 3 chars)
+    const keywords = title.toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter(word => word.length > 3);
+
+    // Filter related news (excluding the current one by link)
+    relatedNews = allNews.filter(item => {
+      if (item.link === url) return false;
+      const itemTitleLower = item.title.toLowerCase();
+      return keywords.some(keyword => itemTitleLower.includes(keyword));
+    }).slice(0, 5); // Top 5
+  } catch (error) {
+    console.error("Failed to fetch related news:", error);
+  }
+
   // Plain text for AI Summary and Voice Reader
   const plainText = content.replace(/<[^>]+>/g, '\n').replace(/\n\s*\n/g, '\n\n').trim();
+
+  // Extract source name from URL
+  let sourceName = "Berita Asli";
+  try {
+    const sourceUrl = new URL(source);
+    sourceName = sourceUrl.hostname.replace('www.', '');
+    if (sourceName.includes('cnnindonesia')) sourceName = "CNN Indonesia";
+    if (sourceName.includes('cnbcindonesia')) sourceName = "CNBC Indonesia";
+  } catch (e) {}
 
   return (
     <article className={styles.article}>
@@ -63,7 +94,7 @@ export default async function ReadPage({ searchParams }) {
         </div>
         <h1 className={styles.title}>{title}</h1>
         <div className={styles.meta}>
-          <span>Oleh: {author}</span>
+          <span>Oleh: {author || sourceName}</span>
           <span>•</span>
           <span>{date}</span>
         </div>
@@ -74,10 +105,10 @@ export default async function ReadPage({ searchParams }) {
           className={styles.heroImage}
           style={{ backgroundImage: `url(${image})` }}
         />
-        <p className={styles.caption}>Sumber: <a href={source} target="_blank" rel="noreferrer" className={styles.sourceLink}>Berita Asli</a></p>
+        <p className={styles.caption}>Sumber Gambar & Konten: <a href={source} target="_blank" rel="noreferrer" className={styles.sourceLink}>{sourceName}</a></p>
       </div>
 
-      <ArticleClientWrapper scrapedData={scraped.data} plainText={plainText} />
+      <ArticleClientWrapper scrapedData={scraped.data} plainText={plainText} relatedNews={relatedNews} />
     </article>
   );
 }
