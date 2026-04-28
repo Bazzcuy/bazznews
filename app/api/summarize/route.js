@@ -45,9 +45,10 @@ export async function POST(request) {
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
       console.error("Gemini API Error:", errorData);
-      return NextResponse.json({ error: "Gagal memproses dengan AI" }, { status: 500 });
+      const errMsg = errorData.error?.message || "Gagal memproses dengan AI";
+      return NextResponse.json({ error: errMsg }, { status: response.status });
     }
 
     const data = await response.json();
