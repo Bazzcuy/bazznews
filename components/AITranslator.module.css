@@ -1,0 +1,114 @@
+.container {
+  position: relative;
+  display: inline-block;
+  z-index: 50;
+  margin-bottom: 1.5rem;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  font-size: 0.95rem;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.arrow {
+  transition: transform 0.3s ease;
+}
+
+.arrowRotated {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: var(--foreground, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.option {
+  padding: 0.6rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--text-color, #1e293b);
+  text-align: left;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.option:hover {
+  background: var(--background-hover, #f1f5f9);
+  color: var(--primary-color, #4f46e5);
+}
+
+.selectedOption {
+  background: var(--background-active, #e0e7ff);
+  color: var(--primary-color, #4f46e5);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark mode support */
+:global(.dark-mode) .dropdown {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+:global(.dark-mode) .option {
+  color: #e2e8f0;
+}
+
+:global(.dark-mode) .option:hover {
+  background: #334155;
+  color: #818cf8;
+}
+
+:global(.dark-mode) .selectedOption {
+  background: #312e81;
+  color: #a5b4fc;
+}
