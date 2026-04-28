@@ -9,18 +9,23 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+import { fetchRSS } from "./utils/fetchRSS";
+
 export const metadata = {
   title: "Bazznews | Portal Berita Terkini & Canggih",
   description: "Dapatkan berita terbaru, terlengkap, dan terpercaya di Indonesia dengan pengalaman AI dan Voice Reader.",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const cnnRes = await fetchRSS("cnn", "terbaru");
+  const cnnNews = cnnRes.success ? cnnRes.data.slice(0, 5) : [];
+
   return (
     <html lang="id" suppressHydrationWarning>
       <body className={`${inter.variable}`}>
         <ThemeProvider>
           <Header />
-          <BreakingNews />
+          <BreakingNews breakingNews={cnnNews} />
           <main className="container" style={{ flex: 1 }}>
             {children}
           </main>
