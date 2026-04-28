@@ -8,10 +8,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Teks artikel tidak ditemukan" }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json({ error: "API Key Gemini tidak ditemukan. Silakan atur GEMINI_API_KEY di variabel lingkungan." }, { status: 500 });
+      return NextResponse.json({ error: "API Key Groq tidak ditemukan. Silakan atur GROQ_API_KEY di variabel lingkungan." }, { status: 500 });
     }
 
     const prompt = `
@@ -22,62 +22,50 @@ export async function POST(request) {
       Teks Berita:
       "${articleText}"
       
-      Balas HANYA dengan format JSON array berisi string untuk setiap poin. 
+      Balas HANYA dengan format JSON object yang memiliki key "points" berisi array string untuk setiap poin.
       Contoh format balasan:
-      ["Ringkasan poin pertama.", "Ringkasan poin kedua.", "Ringkasan poin ketiga."]
-      Jangan tambahkan teks markdown seperti \`\`\`json.
+      {
+        "points": ["Ringkasan poin pertama.", "Ringkasan poin kedua.", "Ringkasan poin ketiga."]
+      }
     `;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-          }
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.2,
+          response_format: { type: "json_object" }
         }),
       }
     );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("Gemini API Error:", errorData);
+      console.error("Groq API Error:", errorData);
       const errMsg = errorData.error?.message || "Gagal memproses dengan AI";
       return NextResponse.json({ error: errMsg }, { status: response.status });
     }
 
     const data = await response.json();
-    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const textResponse = data.choices?.[0]?.message?.content;
 
     if (!textResponse) {
-      throw new Error("Format respons tidak valid dari Gemini");
+      throw new Error("Format respons tidak valid dari Groq");
     }
 
-    // Membersihkan markdown jika ada
-    let cleanedText = textResponse.replace(/```json/g, '').replace(/```/gi, '').trim();
-    
     let summaryPoints = [];
     try {
-      // Coba parse JSON langsung
-      summaryPoints = JSON.parse(cleanedText);
-      if (!Array.isArray(summaryPoints)) {
-        summaryPoints = [summaryPoints.toString()];
-      }
+      const parsedJson = JSON.parse(textResponse);
+      summaryPoints = parsedJson.points || [];
     } catch (e) {
-      // Jika gagal, coba bersihkan bullets dan split per baris
-      summaryPoints = cleanedText
-        .split('\n')
-        .map(line => line.replace(/^(\d+\.\s*|-\s*|\*\s*)/, '').trim()) // Hapus format 1., -, *
-        .filter(line => line.length > 10);
-        
-      if (summaryPoints.length === 0) {
-        summaryPoints = [textResponse.substring(0, 150) + "..."];
-      }
+      summaryPoints = [textResponse];
     }
 
     return NextResponse.json({ summary: summaryPoints });

@@ -8,10 +8,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Teks artikel tidak ditemukan" }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json({ error: "API Key Gemini tidak ditemukan. Silakan atur GEMINI_API_KEY di variabel lingkungan." }, { status: 500 });
+      return NextResponse.json({ error: "API Key Groq tidak ditemukan. Silakan atur GROQ_API_KEY di variabel lingkungan." }, { status: 500 });
     }
 
     // Format prompt + history
@@ -31,17 +31,17 @@ export async function POST(request) {
     `;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-          }
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
         }),
       }
     );
@@ -53,10 +53,10 @@ export async function POST(request) {
     }
 
     const data = await response.json();
-    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const textResponse = data.choices?.[0]?.message?.content;
 
     if (!textResponse) {
-      throw new Error("Format respons tidak valid dari Gemini");
+      throw new Error("Format respons tidak valid dari Groq");
     }
 
     return NextResponse.json({ answer: textResponse.trim() });
