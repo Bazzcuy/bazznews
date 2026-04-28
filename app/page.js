@@ -19,7 +19,7 @@ export default async function Home() {
     title: n.title,
     category: "CNN Nasional",
     image: n.image,
-    slug: n.slug,
+    link: n.link,
   }));
 
   // Use next items for grid
@@ -30,7 +30,7 @@ export default async function Home() {
     category: "CNBC Terbaru",
     date: new Date(n.isoDate).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
     image: n.image,
-    slug: n.slug,
+    link: n.link,
   }));
 
   return (
@@ -49,7 +49,7 @@ export default async function Home() {
               {cnnNews.slice(3, 8).map((item, index) => (
                 <li key={index} className={styles.popularItem}>
                   <span className={styles.popularItemRank}>#{index + 1}</span>
-                  <a href={`/berita/${item.slug}`} className={styles.popularItemLink}>
+                  <a href={`/berita/baca?url=${encodeURIComponent(item.link)}`} className={styles.popularItemLink}>
                     {item.title}
                   </a>
                 </li>

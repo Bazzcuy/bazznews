@@ -16,7 +16,7 @@ export default function NewsGrid({ newsList = [] }) {
       <div className={styles.grid}>
         {newsList.map((news) => (
           <article key={news.id} className={styles.card}>
-            <Link href={`/berita/${news.slug}`} className={styles.imageWrapper}>
+            <Link href={`/berita/baca?url=${encodeURIComponent(news.link || '')}`} className={styles.imageWrapper}>
               <div
                 className={styles.image}
                 style={{ backgroundImage: `url(${news.image})` }}
@@ -28,7 +28,7 @@ export default function NewsGrid({ newsList = [] }) {
               <div className={styles.meta}>
                 <span className={styles.date}>{news.date}</span>
               </div>
-              <Link href={`/berita/${news.slug}`}>
+              <Link href={`/berita/baca?url=${encodeURIComponent(news.link || '')}`}>
                 <h4 className={styles.title}>{news.title}</h4>
               </Link>
               <p className={styles.excerpt}>{news.excerpt}</p>

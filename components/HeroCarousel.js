@@ -29,7 +29,7 @@ export default function HeroCarousel({ headlines = [] }) {
             <div className={styles.overlay}></div>
             <div className={styles.content}>
               <span className={styles.category}>{item.category}</span>
-              <Link href={`/berita/${item.slug}`}>
+              <Link href={`/berita/baca?url=${encodeURIComponent(item.link || '')}`}>
                 <h2 className={styles.title}>{item.title}</h2>
               </Link>
             </div>
