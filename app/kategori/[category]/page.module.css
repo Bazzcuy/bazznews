@@ -27,3 +27,12 @@
   color: var(--text-muted);
   font-size: 1.125rem;
 }
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+  .description {
+    font-size: 1rem;
+  }
+}

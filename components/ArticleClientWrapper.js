@@ -23,14 +23,13 @@ export default function ArticleClientWrapper({ scrapedData, plainText }) {
   return (
     <div className={styles.contentWrapper}>
       <div className={styles.mainContent}>
-        {/* Fitur Canggih */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        {/* Smart Tools Toolbar */}
+        <div className={styles.toolsToolbar}>
+          <AISummary articleText={plainText} />
+          <VoiceReader text={plainText} />
           <AITranslator articleText={plainText} onTranslate={handleTranslation} />
         </div>
 
-        <AISummary articleText={plainText} />
-        <VoiceReader text={plainText} />
-        
         <div 
           className={`${styles.bodyText} bodyText`}
           dangerouslySetInnerHTML={{ __html: displayContent }}
@@ -57,5 +56,4 @@ export default function ArticleClientWrapper({ scrapedData, plainText }) {
       </aside>
     </div>
   );
-}
 }
