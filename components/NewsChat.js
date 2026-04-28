@@ -3,6 +3,24 @@
 import { useState, useRef, useEffect } from "react";
 import styles from "./NewsChat.module.css";
 
+const BotIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 8V4H8" />
+    <rect width="16" height="12" x="4" y="8" rx="2" />
+    <path d="M2 14h2" />
+    <path d="M20 14h2" />
+    <path d="M15 13v2" />
+    <path d="M9 13v2" />
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
 export default function NewsChat({ articleText }) {
   const [messages, setMessages] = useState([
     { role: "bot", text: "Halo! Saya AI Bazznews. Tanyakan apa saja seputar berita di atas." }
@@ -51,18 +69,24 @@ export default function NewsChat({ articleText }) {
 
   return (
     <div className={styles.chatWrapper}>
-      <h3 className={styles.chatTitle}>Tanya AI Tentang Berita Ini</h3>
+      <h3 className={styles.chatTitle}>
+        <BotIcon /> Tanya AI Tentang Berita Ini
+      </h3>
       <div className={styles.chatBox}>
         <div className={styles.messages}>
           {messages.map((m, i) => (
             <div key={i} className={`${styles.message} ${m.role === 'user' ? styles.userMessage : styles.botMessage}`}>
-              <span className={styles.avatar}>{m.role === 'user' ? '👤' : '🤖'}</span>
+              <span className={styles.avatarWrapper}>
+                {m.role === 'user' ? <UserIcon /> : <BotIcon />}
+              </span>
               <div className={styles.messageText}>{m.text}</div>
             </div>
           ))}
           {isLoading && (
             <div className={`${styles.message} ${styles.botMessage}`}>
-              <span className={styles.avatar}>🤖</span>
+              <span className={styles.avatarWrapper}>
+                <BotIcon />
+              </span>
               <div className={styles.typing}>AI sedang mengetik...</div>
             </div>
           )}
