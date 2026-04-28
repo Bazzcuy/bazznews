@@ -1,0 +1,88 @@
+.focusWrapper {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.toggleBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--foreground, #fff);
+  color: var(--text-color, #0f172a);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggleBtn:hover {
+  border-color: var(--primary-color, #2563eb);
+}
+
+.activeBtn {
+  background: var(--primary-color, #2563eb);
+  color: white;
+  border-color: var(--primary-color, #2563eb);
+}
+
+.controls {
+  display: flex;
+  gap: 1.5rem;
+  background: var(--bg-secondary, #f8fafc);
+  padding: 1rem;
+  border-radius: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  border: 1px solid var(--border-color, #e2e8f0);
+  width: 100%;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: var(--text-muted, #64748b);
+  font-weight: 500;
+}
+
+.btn {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.value {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.select {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: white;
+}
+
+.themeBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  cursor: pointer;
+}
+
+.light { background-color: #ffffff; }
+.sepia { background-color: #f4ecd8; }
+.dark { background-color: #121212; }
+
+.selectedTheme {
+  border-color: var(--primary-color, #2563eb);
+}

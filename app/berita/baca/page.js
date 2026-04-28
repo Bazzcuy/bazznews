@@ -1,3 +1,4 @@
+import ArticleClientWrapper from "@/components/ArticleClientWrapper";
 import AISummary from "@/components/AISummary";
 import VoiceReader from "@/components/VoiceReader";
 import Link from "next/link";
@@ -58,7 +59,7 @@ export default async function ReadPage({ searchParams }) {
     <article className={styles.article}>
       <header className={styles.header}>
         <div className={styles.breadcrumb}>
-          <Link href="/">Beranda</Link> &gt; <Link href="#">Berita Nasional</Link>
+          <Link href="/">Beranda</Link> &gt; <Link href="#">Berita Terbaru</Link>
         </div>
         <h1 className={styles.title}>{title}</h1>
         <div className={styles.meta}>
@@ -76,34 +77,7 @@ export default async function ReadPage({ searchParams }) {
         <p className={styles.caption}>Sumber: <a href={source} target="_blank" rel="noreferrer" className={styles.sourceLink}>Berita Asli</a></p>
       </div>
 
-      <div className={styles.contentWrapper}>
-        <div className={styles.mainContent}>
-          <AISummary articleText={plainText} />
-          <VoiceReader text={plainText} />
-          
-          <div 
-            className={styles.bodyText}
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
-
-          <div className={styles.tags}>
-            <span className={styles.tagLabel}>Bazznews:</span>
-            <Link href="/" className={styles.tag}>Terkini</Link>
-            <Link href="/" className={styles.tag}>Nasional</Link>
-          </div>
-        </div>
-        
-        <aside className={styles.sidebar}>
-          <h3 className={styles.sidebarTitle}>Berita Terkait</h3>
-          <ul className={styles.relatedList}>
-            <li className={styles.relatedItem}>
-              <Link href="/">
-                Kembali ke Beranda untuk melihat berita lainnya.
-              </Link>
-            </li>
-          </ul>
-        </aside>
-      </div>
+      <ArticleClientWrapper scrapedData={scraped.data} plainText={plainText} />
     </article>
   );
 }
