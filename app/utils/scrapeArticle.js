@@ -32,54 +32,88 @@ export async function scrapeArticle(url) {
 
     // Ekstrak Isi Konten Berita
     let contentHtml = "";
-    
-    // Pattern untuk CNN / CNBC
-    let contentMatch = html.match(/class="detail_text[^>]*>([\s\S]*?)<div class="clearfix"/);
-    if (!contentMatch) {
-      contentMatch = html.match(/class="detail-text[^>]*>([\s\S]*?)<div class="clearfix"/);
-    }
-    if (!contentMatch) {
-      contentMatch = html.match(/<div class="txt-article[^>]*>([\s\S]*?)<div class="clearfix"/); // Tribunnews
+
+    // 1. Coba dari JSON-LD (Paling Akurat jika tersedia)
+    try {
+      const ldJsonMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g);
+      if (ldJsonMatch) {
+        for (const script of ldJsonMatch) {
+          const jsonText = script.replace(/<script[^>]*>/, '').replace(/<\/script>/, '').trim();
+          try {
+            const json = JSON.parse(jsonText);
+            const body = json.articleBody || (Array.isArray(json) ? json[0].articleBody : null) || (json['@graph'] ? json['@graph'].find(o => o.articleBody)?.articleBody : null);
+            if (body && body.length > 100) {
+              contentHtml = body.split('\n').filter(line => line.trim().length > 20).map(line => `<p>${line.trim()}</p>`).join('');
+              break;
+            }
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    if (!contentHtml) {
+      // 2. Coba Selectors HTML yang umum di situs berita Indonesia
+      const patterns = [
+        /class="detail_text[^>]*>([\s\S]*?)<div class="clearfix"/,
+        /class="detail-text[^>]*>([\s\S]*?)<div class="clearfix"/,
+        /class="txt-article[^>]*>([\s\S]*?)<div class="clearfix"/,
+        /class="post-content[^>]*>([\s\S]*?)<\/div>/,
+        /class="read__content[^>]*>([\s\S]*?)<\/div>/,
+        /class="detail__body-text[^>]*>([\s\S]*?)<\/div>/,
+        /itemprop="articleBody"[^>]*>([\s\S]*?)<\/div>/
+      ];
+
+      let rawContent = "";
+      for (const pattern of patterns) {
+        const match = html.match(pattern);
+        if (match && match[1].length > 200) {
+          rawContent = match[1];
+          break;
+        }
+      }
+
+      if (rawContent) {
+        // Hapus tags yang tidak perlu
+        rawContent = rawContent.replace(/<script[\s\S]*?<\/script>/gi, '');
+        rawContent = rawContent.replace(/<style[\s\S]*?<\/style>/gi, '');
+        rawContent = rawContent.replace(/<div[^>]*class="parallax[^>]*>[\s\S]*?<\/div>/gi, '');
+        rawContent = rawContent.replace(/<div[^>]*class="box_wrap[^>]*>[\s\S]*?<\/div>/gi, '');
+        rawContent = rawContent.replace(/<table[\s\S]*?<\/table>/gi, '');
+        rawContent = rawContent.replace(/<div[^>]*class="link[^>]*>[\s\S]*?<\/div>/gi, '');
+        rawContent = rawContent.replace(/<div[^>]*class="video[^>]*>[\s\S]*?<\/div>/gi, '');
+        
+        // Ambil teks di dalam tag p (lebih fleksibel dengan atribut)
+        const pMatches = rawContent.match(/<p[^>]*>([\s\S]*?)<\/p>/gi);
+        if (pMatches && pMatches.length > 0) {
+          contentHtml = pMatches.map(p => {
+            let cleanP = p.replace(/<(?!\/?(b|i|strong|em)\b)[^>]+>/g, '').trim();
+            return cleanP.length > 10 ? `<p>${cleanP}</p>` : '';
+          }).join('');
+        } else {
+          // Fallback kalau tidak ada tag p tapi ada teks
+          let cleanText = rawContent.replace(/<[^>]+>/g, '\n').replace(/\n\s*\n/g, '\n\n').trim();
+          contentHtml = cleanText.split('\n\n').map(p => `<p>${p}</p>`).join('');
+        }
+      }
     }
 
-    if (contentMatch) {
-      let rawContent = contentMatch[1];
-      
-      // Hapus tags yang tidak perlu
-      rawContent = rawContent.replace(/<script[\s\S]*?<\/script>/gi, '');
-      rawContent = rawContent.replace(/<style[\s\S]*?<\/style>/gi, '');
-      rawContent = rawContent.replace(/<div class="parallax[^>]*>[\s\S]*?<\/div>/gi, '');
-      rawContent = rawContent.replace(/<div class="box_wrap[^>]*>[\s\S]*?<\/div>/gi, '');
-      rawContent = rawContent.replace(/<table[\s\S]*?<\/table>/gi, '');
-      rawContent = rawContent.replace(/<div class="link[^>]*>[\s\S]*?<\/div>/gi, '');
-      rawContent = rawContent.replace(/<div class="video[^>]*>[\s\S]*?<\/div>/gi, '');
-      
-      // Ambil teks di dalam tag p
-      const pMatches = rawContent.match(/<p>([\s\S]*?)<\/p>/g);
-      if (pMatches && pMatches.length > 0) {
-        contentHtml = pMatches.map(p => {
-          // Bersihkan HTML di dalam P tapi pertahankan b, i, strong, em
-          let cleanP = p.replace(/<(?!\/?(b|i|strong|em)\b)[^>]+>/g, '').trim();
-          return cleanP.length > 10 ? `<p>${cleanP}</p>` : '';
-        }).join('');
-      } else {
-        // Fallback kalau tidak ada tag p tapi ada teks
-        let cleanText = rawContent.replace(/<[^>]+>/g, '\n').replace(/\n\s*\n/g, '\n\n').trim();
-        contentHtml = cleanText.split('\n\n').map(p => `<p>${p}</p>`).join('');
-      }
-    } else {
-      // Fallback sangat generik: cari semua paragraf di seluruh dokumen
-      const pMatches = html.match(/<p>([\s\S]*?)<\/p>/g);
+    // 3. Fallback Terakhir: Cari semua paragraf di seluruh dokumen yang terlihat seperti konten
+    if (!contentHtml) {
+      const pMatches = html.match(/<p[^>]*>([\s\S]*?)<\/p>/gi);
       if (pMatches) {
-        let paragraphs = pMatches.map(p => p.replace(/<[^>]+>/g, '').trim()).filter(p => p.length > 50);
-        // Buang beberapa paragraf pertama atau terakhir yang biasanya header/footer
-        if (paragraphs.length > 5) {
-          paragraphs = paragraphs.slice(1, paragraphs.length - 2);
+        let paragraphs = pMatches
+          .map(p => p.replace(/<[^>]+>/g, '').trim())
+          .filter(p => p.length > 60 && !p.includes('Copyright') && !p.includes('Baca juga'));
+        
+        if (paragraphs.length > 3) {
+          // Biasanya paragraf berita ada di tengah, hindari header/footer
+          contentHtml = paragraphs.map(p => `<p>${p}</p>`).join('');
         }
-        contentHtml = paragraphs.map(p => `<p>${p}</p>`).join('');
-      } else {
-         contentHtml = "<p>Maaf, isi berita tidak dapat diekstrak untuk saat ini.</p>";
       }
+    }
+
+    if (!contentHtml) {
+      contentHtml = "<p>Maaf, isi berita tidak dapat diekstrak untuk saat ini. Silakan kunjungi tautan sumber untuk membaca selengkapnya.</p>";
     }
 
     return {
