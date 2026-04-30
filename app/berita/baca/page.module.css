@@ -203,4 +203,14 @@
     align-items: stretch;
     gap: 1rem;
   }
+  .title {
+    font-size: 1.5rem;
+  }
+  .heroImage {
+    height: 200px;
+  }
+  .meta {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 }

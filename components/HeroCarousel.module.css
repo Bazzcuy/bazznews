@@ -118,6 +118,7 @@
 @media (max-width: 768px) {
   .carouselContainer {
     height: 50vh;
+    min-height: 350px;
   }
   .content {
     padding: 1.5rem;
@@ -127,5 +128,27 @@
   }
   .indicators {
     right: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .carouselContainer {
+    min-height: 250px;
+    height: 45vh;
+  }
+  .content {
+    padding: 1rem;
+  }
+  .title {
+    font-size: 1.4rem;
+  }
+  .category {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+  .indicators {
+    right: 1rem;
+    bottom: 1rem;
   }
 }

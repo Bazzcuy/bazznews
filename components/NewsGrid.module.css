@@ -130,3 +130,19 @@
   margin-bottom: 1rem;
   flex: 1;
 }
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .sectionTitle {
+    font-size: 1.25rem;
+  }
+  .content {
+    padding: 1.25rem;
+  }
+  .imageWrapper {
+    aspect-ratio: 16 / 9;
+  }
+}
